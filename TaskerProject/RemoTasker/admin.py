@@ -1,3 +1,6 @@
 from django.contrib import admin
+from .models import *
 
-# Register your models here.
+admin.site.register(AvailableTasks)
+admin.site.register(TaskInfo)
+admin.site.register(UserProfile)

@@ -1,3 +1,13 @@
 from django.db import models
 
-# Create your models here.
+
+class UserProfile(models.Model):
+    pass
+
+
+class AvailableTasks(models.Model):
+    pass
+
+
+class TaskInfo(models.Model):
+    pass
