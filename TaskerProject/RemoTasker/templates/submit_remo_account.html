@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Register to start earning</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inria+Sans:wght@400;700&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kaushan+Script&display=swap">
+    <link rel="stylesheet" href="../static/css/main.css">
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+          integrity="sha512-..........." crossorigin="anonymous"/>
+
+
+</head>
+<body>
+<nav class="w3-bar w3-black" style="justify-content:space-between;display:flex">
+    <a href="{% url 'home' %}" style="text-decoration:none"><p id="title">EarnExtraDollar</p></a>
+    <div style="padding:10px" class="nav-links">
+        {% if request.user.is_authenticated %}
+        <a href="{%  url 'account' %}" class="w3-button w3-bar-item">My Account</a>
+        {% else %}
+        <a href="{%  url 'login' %}" class="w3-button w3-bar-item">Login</a>
+        <a href="{%  url 'register' %}" class="w3-button w3-bar-item nav-active" style="color:#33E24F;">Register</a>
+        {% endif %}
+        <a href="{%  url 'availableTasks' %}" class="w3-button w3-bar-item">Tasks</a>
+        <a href="{%  url 'contact' %}" class="w3-button w3-bar-item">Contact</a>
+    </div>
+
+</nav>
+
+<div style="margin-right:20%;padding-left:20%;">
+    <h1 style="text-align:center">Submit Task</h1>
+    <div class="form-box">
+        <form action="{% url 'submitTaskRemo' %}" method="POST" onsubmit="return validateRemoForm()">
+            {% csrf_token %}
+            {% if messages %}
+            <ul>
+                {% for message in messages %}
+                <li style="color:red">{{ message }}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+            <label for="taskname">Task Completed</label><br>
+            <select id="taskname" name="taskname">
+                {% for r in tasks %}
+                <option value="{{r.task_name}}">{{r.task_name}}</option>
+                {% endfor %}
+            </select><br>
+            <label for="remo_username">Account Username</label><br>
+            <input type="text" name="remo_username" id="remo_username"
+                   placeholder="Enter Username of the account you have created" required><br>
+            <label for="remo_password">Account Password</label><br>
+            <input type="text" name="remo_password" id="remo_password"
+                   placeholder="Enter Password of the account you have created " required><br>
+            <label for="country">Select Country</label><br>
+            <select id="country" name="country">
+                <option value="canada">Canada</option>
+                <option value="india">India</option>
+                <option value="unitedstatesofamerica">United States of America</option>
+            </select><br>
+            <div style="display:flex;">
+                <input type="checkbox" id="checkbox" style="width:30px;align-items:center;justify-content:center"
+                       required>
+                <p>I confirm that the details provided above are correct</p>
+
+            </div>
+            <p id="error_mess" style="color:red"></p>
+
+
+            <div style="align-items:center;display:flex;justify-content:center;width:100%;margin-top:30px">
+                <button type="submit">
+                    SUBMIT
+                </button>
+            </div>
+        </form>
+    </div>
+
+</div>
+
+</body>
+</html>

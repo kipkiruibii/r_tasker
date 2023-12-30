@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Task Description</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inria+Sans:wght@400;700&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kaushan+Script&display=swap">
+    <link rel="stylesheet" href="../static/css/main.css">
+
+</head>
+<body>
+<nav class="w3-bar w3-black" style="justify-content:space-between;display:flex">
+    <a href="{% url 'home' %}" style="text-decoration:none"><p id="title">EarnExtraDollar</p></a>
+    <div style="padding:10px" class="nav-links">
+        {% if request.user.is_authenticated %}
+        <a href="{%  url 'account' %}" class="w3-button w3-bar-item">My Account</a>
+        {% else %}
+        <a href="{%  url 'login' %}" class="w3-button w3-bar-item">Login</a>
+        <a href="{%  url 'register' %}" class="w3-button w3-bar-item">Register</a>
+        {% endif %}
+        <a href="{%  url 'availableTasks' %}" class="w3-button w3-bar-item" style="color:#33E24F;">Tasks</a>
+        <a href="{%  url 'contact' %}" class="w3-button w3-bar-item">Contact</a>
+        {% if request.user.is_authenticated %}
+        <a href="{%  url 'logout' %}" class="w3-button w3-bar-item">Log Out</a>
+        {% endif %}
+    </div>
+
+</nav>
+<div style="margin-right:20%;padding-left:20%;margin-bottom:40px">
+    <h1 style="text-align:center;color:#33E24F">{{task.task.task_name}}</h1>
+    <h3>Job Description</h3>
+    <p>{{task.task_description|safe}}</p>
+<!--    <p>-->
+<!--        Remotasks is a platform that connects companies and individuals looking for help with tasks that can be-->
+<!--        completed-->
+<!--        online with a workforce of remote workers. The tasks typically involve data labeling, image annotation, and-->
+<!--        other types of annotation or categorization tasks that require human intelligence.-->
+<!--        Companies often use Remotasks to outsource tasks that are challenging for computers but relatively-->
+<!--        straightforward for humans. This can include training machine learning models, improving image recognition-->
+<!--        algorithms, and other similar projects.-->
+
+<!--    </p>-->
+<!--    <p>-->
+<!--        In a globalized digital landscape, certain developers may encounter constraints based on their geographical-->
+<!--        locations, hindering their ability to participate in platforms like Remotask. This task involves the creation of-->
+<!--        Remotask accounts, ensuring inclusivity and accessibility for developers around the world.-->
+<!--    </p>-->
+<!--    <p>-->
+<!--        You are required to help create these accounts for the developers outside your country. If you are interested-->
+<!--        please continue reading the additional information below.-->
+<!--    </p>-->
+    <h3>Requirements</h3>
+    {{task.requirements|safe}}
+<!--    <p>-->
+<!--        Creation of Remotasks accounts requires the following to be met:-->
+<!--    </p>-->
+<!--    <ol>-->
+<!--        -->
+<!--        <li>Must be an INDIAN CITIZEN</li>-->
+<!--        <li>Must have a National Identity Card</li>-->
+<!--        <li>Must have an Indian Phone number</li>-->
+<!--        <li>Skill Level: None</li>-->
+<!--        <li>Age: Over 18 years</li>-->
+<!--    </ol>-->
+<!--    <h3>How to create Remotasks account</h3>-->
+    <h3>{{task.how_to_title}}</h3>
+<!--    <p style="color:#FF0505">Ensure the VPN or Proxy is off</p>-->
+    <p style="color:#FF0505">{{task.how_to_important}}</p>
+    <ol>
+        <li>Go to <a href="#">www.remotasks.com</a> in your browser</li>
+        <li>Go to Sign Up at the top -right corner</li>
+        <li>Follow the on-screen instructions</li>
+        <li>Ensure your account has been verified</li>
+    </ol>
+    <p>Once you have completed creating and verifying the account, Upload the login details (Username and password) used
+        to remote@roniib.com</p>
+    <h3>Pay</h3>
+    <p style="padding-left:20px;color:#33E24F;font-size:20px;font-weight:bold">$10 Per Account</p>
+    <p>The total amount will be deposited to your account immediately and will be widrawable once the information has
+        been confirmed
+    </p>
+    <p>
+        If you have any questions do not hesitate to contact us via email
+        <a href="mailto:remote-help@roniib.com" style="color:blue">remote-help@roniib.com</a>
+    </p>
+
+</div>
+
+</body>
+</html>
