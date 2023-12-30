@@ -39,12 +39,20 @@
     <h3>Pay</h3>
     {{task.pay|safe}}
     <h3>How to submit task</h3>
-    <p>Upon completion of the task above, follow the steps below to submit and update your payment.</p>
+
+    <p>Upon completion of the task above, follow the steps below to submit and earn.</p>
     <p>Please note that if you do not carefully follow the steps below, you may not receive any payment.</p>
+    <p>
+        Login to your EarnExtraDollar account and click <a href="{% url  'submitTaskRemo'  %}"
+                                                           style="text-decoration:none;color:blue">HERE</a>
+        to submit the task.
+    </p>
+
     {{task.how_to_submit|safe}}
     <p>The balance will reflect immediately in your <strong><i>Pending Balance</i></strong> and will
         be available in your actual balance for withdrawal once we have confirmed the details you have provided.</p>
-    <p>If you have any problem or queries, do not hesitate to contact us through our <a href="{% url 'contact' %}">contact form</a>  </p>
+    <p>If you have any problem or queries, do not hesitate to contact us through our <a href="{% url 'contact' %}">contact
+        form</a></p>
 
 </div>
 

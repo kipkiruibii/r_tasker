@@ -11,4 +11,5 @@ urlpatterns = [
     path('available_tasks/', views.availableTasks, name='availableTasks'),
     path('logout/', views.logoutV, name='logout'),
     path('submit_task_remo/', views.remoTask, name='submitTaskRemo'),
+    path('trial_temp/', views.trialTemp, name='trialTemp'),
 ]

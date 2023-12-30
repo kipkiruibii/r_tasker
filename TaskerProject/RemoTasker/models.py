@@ -51,9 +51,11 @@ class UserQueries(models.Model):
 
 class RemoAirtmDetails(models.Model):
     task = models.ForeignKey(AvailableTasks, null=True, on_delete=models.CASCADE)
+    tasker = models.ForeignKey(UserProfile, null=True, on_delete=models.CASCADE)
     username = models.TextField(default='Username')
     password = models.TextField(default='password')
     country = models.TextField(default='country')
+    isConfirmed = models.BooleanField(default=False)
 
     def __str__(self):
-        return self.task.task_name
+        return f'{self.task.task_name} | {self.tasker.username} | {self.isConfirmed}'

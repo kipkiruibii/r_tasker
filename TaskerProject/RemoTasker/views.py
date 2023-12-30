@@ -135,6 +135,7 @@ def logoutV(request):
     return render(request, 'home.html')
 
 
+@login_required(login_url='/login/')
 def remoTask(request):
     if request.method == 'POST':
         taskName = request.POST.get('taskname', '')
@@ -151,9 +152,18 @@ def remoTask(request):
                 country=remoCountry,
             )
             rm.save()
-
+        up = UserProfile.objects.filter(username=request.user.username).first()
+        up.pending += 10
+        up.save()
+        messages.success(request,
+                         'The details were submitted successfully and are under review.\n You can continue submitting more details')
+        return redirect('submitTaskRemo')
     context = {
         'tasks': AvailableTasks.objects.all()
     }
 
     return render(request, 'submit_remo_account.html', context=context)
+
+
+def trialTemp(request):
+    return render(request, 'dummy_task_desc.html')
