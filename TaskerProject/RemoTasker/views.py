@@ -262,8 +262,8 @@ def superAdmin(request):
                     _r.save()
                     # transfer balance from hold to actual account
 
-                    usr.withdrawPending -= 10
-                    usr.withdrawSuccess += 10
+                    usr.withdrawPending -= amt
+                    usr.withdrawSuccess += amt
                     usr.save()
 
                     # update user
