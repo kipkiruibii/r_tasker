@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 {% load static %}
+
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -11,6 +12,8 @@
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
           integrity="sha512-..........." crossorigin="anonymous"/>
+    <!-- Add this script to the head of your HTML document -->
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 
 
 </head>
@@ -64,6 +67,7 @@
                 <option value="india">India</option>
                 <option value="unitedstatesofamerica">United States of America</option>
             </select><br>
+            <div class="g-recaptcha" data-sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"></div>
             <div style="display:flex;">
                 <input type="checkbox" id="checkbox" style="width:30px;align-items:center;justify-content:center"
                        required>
@@ -82,6 +86,18 @@
     </div>
 
 </div>
+<script>
+    function validateRemoForm() {
+        var recaptchaResponse = grecaptcha.getResponse();
+        if (!recaptchaResponse) {
+            $('#error_mess').text('Please complete the reCAPTCHA challenge.');
+            return false;
+        }
+        return true;
+
+
+    }
+</script>
 
 </body>
 </html>

@@ -19,15 +19,19 @@ nav {
 #title{
     color:grey;
     font-family: 'Kaushan Script', cursive;
+    margin-left:10px;
+
 }
 
 .nav-links a{
     padding-right:20px;
     color:white;
     text-decoration:none;
+
 }
 .nav-links a:hover{
     color:#33E24F;
+
 }
 .nav-active{
     color:#33E24F;
@@ -108,4 +112,5 @@ select {
     border-radius:10px;
     margin-bottom:20px
 }
+
 

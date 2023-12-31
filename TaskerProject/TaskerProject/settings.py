@@ -35,7 +35,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'RemoTasker'
+    'RemoTasker',
+    # 'django_recaptcha',
 ]
 
 MIDDLEWARE = [
@@ -65,6 +66,9 @@ TEMPLATES = [
         },
     },
 ]
+
+# RECAPTCHA_PUBLIC_KEY = 'MyRecaptchaKey123'
+RECAPTCHA_PRIVATE_KEY = '6Le7AUEpAAAAALB1RY6Q4VINrkqlvUAa51A9HikX'
 
 WSGI_APPLICATION = 'TaskerProject.wsgi.application'
 

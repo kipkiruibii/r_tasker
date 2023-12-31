@@ -1,4 +1,3 @@
-
 body {
     font-family: 'Inria Sans', sans-serif;
     color: #333;
@@ -8,6 +7,7 @@ body {
     background-repeat: no-repeat;
     margin: 0;
     padding: 0;
+
 }
 
 nav {
@@ -19,6 +19,7 @@ nav {
 #title{
     color:grey;
     font-family: 'Kaushan Script', cursive;
+    margin-left:10px
 }
 
 .nav-links a{
@@ -64,6 +65,9 @@ button{
 }
 button:hover{
     background:#33E24F;
+}
+button:disabled{
+    background:grey;
 }
 input{
     width:350px;

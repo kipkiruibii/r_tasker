@@ -7,13 +7,14 @@ class UserProfile(models.Model):
     lastname = models.TextField(default='lastname')
     username = models.TextField(default='username')
     email = models.TextField(default='email')
-    paypal_email = models.TextField(default='paypal_email')
-    phone_number = models.TextField(default='phone number')
+    paypalEmail = models.TextField(default='paypal_email')
+    phoneNumber = models.TextField(default='phone number')
     country = models.TextField(default='country')
-    dial_code = models.TextField(default='dial_code')
-    balance = models.IntegerField(default=0)
-    withdrawn = models.IntegerField(default=0)
-    pending = models.IntegerField(default=0)
+    dialCode = models.TextField(default='dial_code')
+    balanceHold = models.IntegerField(default=0)
+    balanceActual = models.IntegerField(default=0)
+    withdrawSuccess = models.IntegerField(default=0)
+    withdrawPending = models.IntegerField(default=0)
 
     def __str__(self):
         return self.username
@@ -59,3 +60,24 @@ class RemoAirtmDetails(models.Model):
 
     def __str__(self):
         return f'{self.task.task_name} | {self.tasker.username} | {self.isConfirmed}'
+
+
+class UserNotifications(models.Model):
+    user = models.ForeignKey(UserProfile, null=True, on_delete=models.CASCADE)
+    message = models.TextField(default='message')
+    date = models.DateTimeField(default=datetime.now())
+    isRead = models.BooleanField(default=False)
+    timesViewed = models.IntegerField(default=0)
+
+    def __str__(self):
+        return self.user.username
+
+
+class WithdrawalRequests(models.Model):
+    user = models.ForeignKey(UserProfile, null=True, on_delete=models.CASCADE)
+    amount = models.IntegerField(default=0)
+    isApproved = models.BooleanField(default=False)
+    date = models.DateTimeField(default=datetime.now())
+
+    def __str__(self):
+        return f'{self.user.username} || {self.amount} '

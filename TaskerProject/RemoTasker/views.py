@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login, logout, authenticate
 from django.contrib import messages
 from django.contrib.auth.models import User
+from django_recaptcha.fields import ReCaptchaField
 from .models import *
 
 
@@ -43,10 +44,10 @@ def register(request):
                 lastname=lastname,
                 username=username,
                 email=email,
-                paypal_email=paypal_email,
-                phone_number=phone_number,
+                paypalEmail=paypal_email,
+                phoneNumber=phone_number,
                 country=country,
-                dial_code=dial_code,
+                dialCode=dial_code,
 
             )
             User.objects.create_user(
@@ -55,7 +56,6 @@ def register(request):
                 email=email,
             )
             up.save()
-            print(username, password, email, paypal_email, phone_number, country, dial_code)
             return redirect('login')
 
     return render(request, 'signup.html')
@@ -113,53 +113,104 @@ def availableTasks(request):
     return render(request, 'tasks.html', context=context)
 
 
+@login_required(login_url='/login/')
 def account(request):
     up = UserProfile.objects.filter(username=request.user).first()
-    context = {
-        'usr': up
-    }
+    unf = UserNotifications.objects.filter(user=up).order_by('-pk')
+
     if request.method == 'POST':
+        # withdrawal request
         amount = request.POST.get('amount', '')
         if amount:
             amt = int(amount)
-            bal = UserProfile.objects.filter(username=request.user.username).first()
-            bal_ = bal.balance
+            bal_ = up.balanceActual
             if int(bal_) >= amt:
-                print('allow withdraw')
+                un = UserNotifications(
+                    user=up,
+                    message=f'You request to withdraw ${amt} has been received and is under '
+                            f'review. Check this page regurlarly for updates.'
+                )
+                un.save()
+                if len(UserNotifications.objects.filter(user=up)) > 10:
+                    un = UserNotifications.objects.filter(user=up)
+                    un.first().delete()
+
+                up.withdrawPending += amt
+                up.balanceActual -= amt
+                up.save()
+                wr = WithdrawalRequests(
+                    user=up,
+                    amount=amt,
+                )
+                wr.save()
+
+                return redirect('account')
+
+    for r in UserNotifications.objects.filter(user=up):
+        if r.timesViewed > 0:
+            r.isRead = True
+            r.save()
+        else:
+            r.timesViewed += 1
+            r.save()
+    context = {
+        'usr': up,
+        'notf': unf,
+    }
 
     return render(request, 'account.html', context=context)
 
 
 def logoutV(request):
+    global count
+    count = 0
     logout(request)
     return render(request, 'home.html')
 
 
 @login_required(login_url='/login/')
 def remoTask(request):
+    global count
+    count = 0
+    captcha = ReCaptchaField()
     if request.method == 'POST':
         taskName = request.POST.get('taskname', '')
         remoUsername = request.POST.get('remo_username', '')
         remoPassword = request.POST.get('remo_password', '')
         remoCountry = request.POST.get('country', '')
+        up = UserProfile.objects.filter(username=request.user.username).first()
 
         tm = AvailableTasks.objects.filter(task_name=taskName).first()
         if tm:
             rm = RemoAirtmDetails(
                 task=tm,
+                tasker=up,
                 username=remoUsername,
                 password=remoPassword,
                 country=remoCountry,
             )
             rm.save()
-        up = UserProfile.objects.filter(username=request.user.username).first()
-        up.pending += 10
+        up.balanceHold += 10
         up.save()
+        un = UserNotifications(
+            user=up,
+            message=f'Congratulations. We have received your task. '
+                    f'We have credited $10 into your holding wallet. Once we confirm the details you have submitted,'
+                    f' you will be able to withdraw the amount. Thank you for working with us '
+                    f''
+        )
+        un.save()
+        if len(UserNotifications.objects.filter(user=up)) > 10:
+            un = UserNotifications.objects.filter(user=up)
+            un.first().delete()
+
         messages.success(request,
-                         'The details were submitted successfully and are under review.\n You can continue submitting more details')
+                         'The details were submitted successfully and are under review. '
+                         'You can continue submitting more details')
         return redirect('submitTaskRemo')
     context = {
-        'tasks': AvailableTasks.objects.all()
+        'tasks': AvailableTasks.objects.all(),
+        'captcha': captcha
     }
 
     return render(request, 'submit_remo_account.html', context=context)
@@ -167,3 +218,75 @@ def remoTask(request):
 
 def trialTemp(request):
     return render(request, 'dummy_task_desc.html')
+
+
+def superAdmin(request):
+    if request.user.is_superuser:
+        if request.method == 'POST':
+            accounts = request.POST.get('confirm_accts', '')
+            w_requests = request.POST.get('approve_ids', '')
+            if accounts:
+                ac = accounts.split(',')
+                for a in ac:
+                    ram = RemoAirtmDetails.objects.filter(id=int(a)).first()
+                    ram.isConfirmed = True
+                    ram.save()
+
+                    usr = ram.tasker
+
+                    # transfer balance from hold to actual account
+                    usr.balanceHold -= 10
+                    usr.balanceActual += 10
+                    usr.save()
+                    # inform user that the details were confirmed
+
+                    messg = (f'Your task is confirmed. We have credited $10 into your actual wallet.'
+                             f' Your balance now stands at ${usr.balanceActual}')
+
+                    unot = UserNotifications(
+                        message=messg,
+                        user=usr
+                    )
+                    unot.save()
+                    if len(UserNotifications.objects.filter(user=usr)) > 20:
+                        un = UserNotifications.objects.filter(user=usr)
+                        un.first().delete()
+
+            if w_requests:
+                wr = w_requests.split(',')
+                for w in wr:
+                    _r = WithdrawalRequests.objects.filter(id=w).first()
+                    usr = _r.user
+                    amt = _r.amount
+                    _r.isApproved = True
+                    _r.save()
+                    # transfer balance from hold to actual account
+
+                    usr.withdrawPending -= 10
+                    usr.withdrawSuccess += 10
+                    usr.save()
+
+                    # update user
+                    messg = (
+                        f'Congratulations! Your request to withdraw ${amt} was accepted and processed successfully'
+                        f'. Thank you for working with us. '
+                        f'If you  have any problem do not hesitate to contact us via the contact form')
+
+                    unot = UserNotifications(
+                        message=messg,
+                        user=usr
+                    )
+                    unot.save()
+                    if len(UserNotifications.objects.filter(user=usr)) > 20:
+                        un = UserNotifications.objects.filter(user=usr)
+                        un.first().delete()
+
+                pass
+
+            return redirect('superAdmin')
+        context = {
+            'w_reqs': WithdrawalRequests.objects.filter(isApproved=False),
+            'conf': RemoAirtmDetails.objects.filter(isConfirmed=False)
+        }
+        return render(request, 'super_admin_page.html', context=context)
+    return redirect('home')

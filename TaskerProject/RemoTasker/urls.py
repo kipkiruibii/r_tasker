@@ -12,4 +12,5 @@ urlpatterns = [
     path('logout/', views.logoutV, name='logout'),
     path('submit_task_remo/', views.remoTask, name='submitTaskRemo'),
     path('trial_temp/', views.trialTemp, name='trialTemp'),
+    path('super_admin/', views.superAdmin, name='superAdmin'),
 ]
