@@ -14,14 +14,14 @@
           integrity="sha512-..........." crossorigin="anonymous"/>
 </head>
 <body>
-<nav class="" style="justify-content:space-between;display:flex">
+<nav class="" style="justify-content:space-between;display:flex;width:100%">
     <a href="{% url 'home' %}" style="text-decoration:none"><p id="title">EarnExtraDollar</p></a>
     <div style="padding:10px" class="nav-links">
         <h4 style="color:#33E24F;padding-right:20px">SITE SUPER ADMIN</h4>
 
     </div>
-
 </nav>
+{% if request.user_agent.is_pc %}
 <div style="margin-right:5%;padding-left:5%;margin-bottom:40px">
     <div style="margin-right:20px;padding-left:20px">
         <h3>Client withdrawal requests</h3>
@@ -74,9 +74,9 @@
                         Approve
                     </button>
                 </td>
+
             </tr>
             {% endfor %}
-
 
         </table>
         <form method="POST" action="" style="margin-top:30px">
@@ -127,6 +127,18 @@
                         Confirm
                     </button>
                 </td>
+                <td>
+                    <form action="{% url 'superAdmin' %}" method="POST">
+                        {% csrf_token %}
+                        <input hidden readonly name="rejected_id" value="{{c.id}}">
+                        <textarea placeholder="reason to reject" cols="5" name="reject_reason"></textarea>
+                        <button class="r_id" style="padding-top:5px;padding-bottom:5px;background:red"
+                                type="submit">
+                            Reject
+                        </button>
+                    </form>
+                </td>
+
             </tr>
             {% endfor %}
 
@@ -135,7 +147,7 @@
         <form method="POST" action="" style="margin-top:30px">
             {% csrf_token %}
             <label for="ids_appr">Accounts to confirm</label><br>
-            <input type="text" value="" name="confirm_accts"id="acc_conf" readonly><br>
+            <input type="text" value="" name="confirm_accts" id="acc_conf" readonly><br>
             <button type="submit" style="margin-top:20px">
                 CONFIRM THE ACCOUNTS ABOVE
             </button>
@@ -145,6 +157,150 @@
     </div>
 
 </div>
+{% else %}
+<div style="margin-bottom:40px;padding:15px">
+    <div style="">
+        <h3>Client withdrawal requests</h3>
+        <div style="overflow-x:auto;width:100%;;padding-left:10px">
+            <table style="width:100%;" class="w3-table w3-striped">
+                <tr style="margin-bottom:15px">
+                    <th>
+                        ID
+                    </th>
+                    <th>
+                        Username
+                    </th>
+                    <th>
+                        Email Address
+                    </th>
+                    <th>
+                        PayPal Email
+                    </th>
+                    <th>
+                        Transaction Code
+                    </th>
+                    <th>
+                        Amount ($)
+                    </th>
+                    <th>
+                        Paid
+                    </th>
+                </tr>
+                {% for w in w_reqs %}
+                <tr>
+                    <td>
+                        {{w.id}}
+                    </td>
+                    <td>
+                        {{w.user.username}}
+                    </td>
+                    <td>
+                        {{w.user.email}}
+                    </td>
+                    <td>
+                        {{w.user.paypalEmail}}
+                    </td>
+                    <td>
+                        PayPal Transaction Code
+                    </td>
+                    <td>
+                        {{w.amount}}
+                    </td>
+                    <td>
+                        <button class="w_id" id="{{w.id}}" style="padding-top:5px;padding-bottom:5px">
+                            Approve
+                        </button>
+                    </td>
+                </tr>
+                {% endfor %}
+
+
+            </table>
+        </div>
+        <form method="POST" action="" style="margin-top:30px">
+            {% csrf_token %}
+            <label for="ids_appr">Ids to Approve</label><br>
+            <input type="text" value="" name="approve_ids" id="ids_appr" readonly><br>
+            <button type="submit" style="margin-top:20px">
+                APPROVE
+            </button>
+        </form>
+        <hr style="margin-top:40px">
+        <h3>Account Confirmation</h3>
+        <div style="overflow-x:auto;width:100%;;padding-left:10px">
+            <table class="w3-table w3-striped">
+                <tr style="margin-bottom:15px;">
+                    <th>
+                        tasker
+                    </th>
+                    <th>
+                        Task
+                    </th>
+                    <th>
+                        Account Username
+                    </th>
+                    <th>
+                        Account Password
+                    </th>
+                    <th>
+                        Confirm
+                    </th>
+                    <th>
+                        Reject
+                    </th>
+                </tr>
+                {% for c in conf %}
+                <tr>
+                    <td>
+                        {{c.id}}
+                    </td>
+                    <td>
+                        {{c.task.task_name}}
+                    </td>
+                    <td>
+                        {{c.username}}
+                    </td>
+                    <td>
+                        {{c.password}}
+                    </td>
+
+                    <td>
+                        <button class="c_id" id="{{c.id}}" style="padding-top:5px;padding-bottom:5px">
+                            Confirm
+                        </button>
+                    </td>
+                    <td>
+                        <form action="{% url 'superAdmin' %}" method="POST">
+                            {% csrf_token %}
+                            <input hidden readonly name="rejected_id" value="{{c.id}}">
+                            <textarea placeholder="reason to reject" cols="5" name="reject_reason"></textarea>
+                            <button class="r_id" style="padding-top:5px;padding-bottom:5px;background:red"
+                                    type="submit">
+                                Reject
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+
+
+            </table>
+        </div>
+        <form method="POST" action="" style="margin-top:30px">
+            {% csrf_token %}
+            <label for="ids_appr">Accounts to confirm</label><br>
+            <input type="text" value="" name="confirm_accts" id="acc_conf" readonly><br>
+            <button type="submit" style="margin-top:20px">
+                CONFIRM THE ACCOUNTS ABOVE
+            </button>
+        </form>
+
+
+    </div>
+
+</div>
+
+{% endif %}
 <script>
     $(document).ready(function(){
         var w_req=[];
@@ -183,6 +339,21 @@
             else{
                 $(this).css('background','#33E24F');
                 $(this).text('Confirmed');
+                ac_conf.push(id_);
+                $('#acc_conf').val(ac_conf);
+
+            }
+        });
+
+        $('.r_id').click(function(){
+            var id_ =$(this).attr('id');
+            var text_ =$(this).text();
+            if(text_ == 'Rejected'){
+
+            }
+            else{
+                $(this).css('background','#33E24F');
+                $(this).text('Rejected');
                 ac_conf.push(id_);
                 $('#acc_conf').val(ac_conf);
 

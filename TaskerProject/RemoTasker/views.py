@@ -156,6 +156,7 @@ def account(request):
     context = {
         'usr': up,
         'notf': unf,
+        'us_t': UserSubmittedTasks.objects.filter(user=up)
     }
 
     return render(request, 'account.html', context=context)
@@ -170,8 +171,6 @@ def logoutV(request):
 
 @login_required(login_url='/login/')
 def remoTask(request):
-    global count
-    count = 0
     captcha = ReCaptchaField()
     if request.method == 'POST':
         taskName = request.POST.get('taskname', '')
@@ -190,43 +189,16 @@ def remoTask(request):
                 country=remoCountry,
             )
             rm.save()
-        # india remotask
-        if 'INDIA' in taskName.upper():
-            if 'REMOTASK' in taskName.upper():
-                # india remotask. $50
-                bal_ = 50
-                pass
-            else:
-                # india airtm  $25
-                bal_ = 25
-
-                pass
-        elif 'USA' in taskName.upper():
-            # usa remotask
-            if 'REMOTASK' in taskName.upper():
-                # 75 $
-                bal_ = 75
-
-                pass
-            else:
-                # usa airtm
-                # 50 $
-                bal_ = 50
-
-                pass
-        else:
-            # canada remotask
-            if 'REMOTASK' in taskName.upper():
-                # 75 usd
-                bal_ = 75
-
-                pass
-            else:
-                # canada airtm
-                # 50 usd
-                bal_ = 50
-
-                pass
+        bal_ = getTaskPrice(taskName)
+        us = UserSubmittedTasks(
+            user=up,
+            taskName=taskName,
+            username=remoUsername,
+            password=remoPassword,
+            isPending=True,
+            amount=bal_,
+        )
+        us.save()
 
         up.balanceHold += bal_
         up.save()
@@ -259,11 +231,72 @@ def trialTemp(request):
     return render(request, 'dummy_task_desc.html')
 
 
+def getTaskPrice(taskPrice):
+    if '(INDIA)' in taskPrice.upper():
+        if 'REMOTASK' in taskPrice.upper():
+            amt = 45
+        else:
+            amt = 30
+
+    elif '(USA)' in taskPrice.upper():
+        if 'REMOTASK' in taskPrice.upper():
+            amt = 75
+        else:
+            amt = 50
+    else:
+        # canada
+        if 'REMOTASK' in taskPrice.upper():
+            amt = 75
+        else:
+            amt = 50
+
+    return amt
+
+
 def superAdmin(request):
     if request.user.is_superuser:
         if request.method == 'POST':
             accounts = request.POST.get('confirm_accts', '')
             w_requests = request.POST.get('approve_ids', '')
+            rejected_id = request.POST.get('rejected_id', '')
+            rejected_reason = request.POST.get('reject_reason', '')
+            print(rejected_reason, rejected_id)
+            if rejected_id:
+                # save rejection details
+                ram = RemoAirtmDetails.objects.filter(id=int(rejected_id)).first()
+                usr = ram.tasker
+                messg = (
+                    f'Your task USERNAME: {ram.username} PASSWORD: {ram.password} TASK: {ram.task.task_name} is Rejected '
+                    f'as it '
+                    f'does not meet our requirement. REASON: {rejected_reason}.')
+
+                unot = UserNotifications(
+                    message=messg,
+                    user=usr
+                )
+                unot.save()
+                ust = UserSubmittedTasks.objects.filter(taskName=ram.task.task_name, username=ram.username,
+                                                        password=ram.password).first()
+                if ust:
+                    ust.isRejected = True
+                    ust.comment = rejected_reason
+                    ust.save()
+                else:
+                    us = UserSubmittedTasks(
+                        user=usr,
+                        taskName=ram.task.task_name,
+                        comment=rejected_reason,
+                        username=ram.username,
+                        password=ram.password,
+                        amount=ram.earnings,
+                        isRejected=True,
+                        dateSubmitted=ram.dateSubmitted
+                    )
+                    us.save()
+                    usr.balanceHold -= ram.earnings
+                    usr.save()
+                    ram.delete()
+
             if accounts:
                 ac = accounts.split(',')
                 for a in ac:
@@ -273,13 +306,17 @@ def superAdmin(request):
 
                     usr = ram.tasker
 
+                    # get task price
+                    tp = getTaskPrice(ram.task.task_name)
+                    ram.earnings = tp
+                    ram.save()
                     # transfer balance from hold to actual account
-                    usr.balanceHold -= 10
-                    usr.balanceActual += 10
+                    usr.balanceHold -= tp
+                    usr.balanceActual += tp
                     usr.save()
                     # inform user that the details were confirmed
 
-                    messg = (f'Your task is confirmed. We have credited $10 into your actual wallet.'
+                    messg = (f'Your task is confirmed. We have credited {tp} USD into your actual wallet.'
                              f' Your balance now stands at ${usr.balanceActual}')
 
                     unot = UserNotifications(
@@ -287,6 +324,26 @@ def superAdmin(request):
                         user=usr
                     )
                     unot.save()
+                    ust = UserSubmittedTasks.objects.filter(taskName=ram.task.task_name, username=ram.username,
+                                                            password=ram.password).first()
+                    if ust:
+                        ust.isConfirmed = True
+                        ust.save()
+                    else:
+                        us = UserSubmittedTasks(
+                            user=usr,
+                            taskName=ram.task.task_name,
+                            username=ram.username,
+                            password=ram.password,
+                            amount=ram.earnings,
+                            isConfirmed=True,
+                            dateSubmitted=ram.dateSubmitted
+                        )
+                        us.save()
+                        usr.balanceHold -= ram.earnings
+                        usr.save()
+                        ram.delete()
+
                     if len(UserNotifications.objects.filter(user=usr)) > 20:
                         un = UserNotifications.objects.filter(user=usr)
                         un.first().delete()

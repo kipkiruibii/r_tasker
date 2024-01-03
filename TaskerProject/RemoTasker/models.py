@@ -54,9 +54,11 @@ class RemoAirtmDetails(models.Model):
     task = models.ForeignKey(AvailableTasks, null=True, on_delete=models.CASCADE)
     tasker = models.ForeignKey(UserProfile, null=True, on_delete=models.CASCADE)
     username = models.TextField(default='Username')
+    earnings = models.IntegerField(default=0)
     password = models.TextField(default='password')
     country = models.TextField(default='country')
     isConfirmed = models.BooleanField(default=False)
+    dateSubmitted = models.DateTimeField(default=datetime.now())
 
     def __str__(self):
         return f'{self.task.task_name} | {self.tasker.username} | {self.isConfirmed}'
@@ -86,6 +88,8 @@ class WithdrawalRequests(models.Model):
 class UserSubmittedTasks(models.Model):
     user = models.ForeignKey(UserProfile, null=True, on_delete=models.CASCADE)
     taskName = models.TextField(default='text')
+    username = models.TextField(default='Username')
+    password = models.TextField(default='password')
     comment = models.TextField(default='comment')
     amount = models.IntegerField(default=0)
     isPending = models.BooleanField(default=False)
