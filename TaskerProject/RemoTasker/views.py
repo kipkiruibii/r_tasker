@@ -190,12 +190,51 @@ def remoTask(request):
                 country=remoCountry,
             )
             rm.save()
-        up.balanceHold += 10
+        # india remotask
+        if 'INDIA' in taskName.upper():
+            if 'REMOTASK' in taskName.upper():
+                # india remotask. $50
+                bal_ = 50
+                pass
+            else:
+                # india airtm  $25
+                bal_ = 25
+
+                pass
+        elif 'USA' in taskName.upper():
+            # usa remotask
+            if 'REMOTASK' in taskName.upper():
+                # 75 $
+                bal_ = 75
+
+                pass
+            else:
+                # usa airtm
+                # 50 $
+                bal_ = 50
+
+                pass
+        else:
+            # canada remotask
+            if 'REMOTASK' in taskName.upper():
+                # 75 usd
+                bal_ = 75
+
+                pass
+            else:
+                # canada airtm
+                # 50 usd
+                bal_ = 50
+
+                pass
+
+        up.balanceHold += bal_
         up.save()
         un = UserNotifications(
             user=up,
             message=f'Congratulations. We have received your task. '
-                    f'We have credited $10 into your holding wallet. Once we confirm the details you have submitted,'
+                    f'We have credited {bal_} USD into your holding wallet. Once we confirm the details you have'
+                    f' submitted,'
                     f' you will be able to withdraw the amount. Thank you for working with us '
                     f''
         )

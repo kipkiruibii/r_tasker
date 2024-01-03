@@ -1,199 +1,195 @@
 <!DOCTYPE html>
 {% load static %}
+
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Super Admin</title>
+    <title>Register to start earning</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inria+Sans:wght@400;700&display=swap">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kaushan+Script&display=swap">
     <link rel="stylesheet" href="../static/css/main.css">
-    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
           integrity="sha512-..........." crossorigin="anonymous"/>
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+
+
 </head>
 <body>
+{% if request.user_agent.is_pc %}
 <nav class="" style="justify-content:space-between;display:flex">
     <a href="{% url 'home' %}" style="text-decoration:none"><p id="title">EarnExtraDollar</p></a>
     <div style="padding:10px" class="nav-links">
-        <h4 style="color:#33E24F;padding-right:20px">SITE SUPER ADMIN</h4>
+        {% if request.user.is_authenticated %}
+        <a href="{%  url 'account' %}" class="">My Account</a>
+        {% else %}
+        <a href="{%  url 'login' %}" class="">Login</a>
+        <a href="{%  url 'register' %}" class="nav-active" style="color:#33E24F;">Register</a>
+        {% endif %}
+        <a href="{%  url 'availableTasks' %}" class="">Tasks</a>
+        <a href="{%  url 'contact' %}" class="">Contact</a>
+        {% if request.user.is_authenticated %}
+        <a href="{%  url 'logout' %}" class="">Log Out</a>
+        {% endif %}
 
     </div>
 
+
 </nav>
-<div style="margin-right:5%;padding-left:5%;margin-bottom:40px">
-    <div style="margin-right:20px;padding-left:20px">
-        <h3>Client withdrawal requests</h3>
-        <table style="width:100%" class="w3-table w3-striped">
-            <tr style="margin-bottom:15px">
-                <th>
-                    ID
-                </th>
-                <th>
-                    Username
-                </th>
-                <th>
-                    Email Address
-                </th>
-                <th>
-                    PayPal Email
-                </th>
-                <th>
-                    Transaction Code
-                </th>
-                <th>
-                    Amount ($)
-                </th>
-                <th>
-                    Paid
-                </th>
-            </tr>
-            {% for w in w_reqs %}
-            <tr>
-                <td>
-                    {{w.id}}
-                </td>
-                <td>
-                    {{w.user.username}}
-                </td>
-                <td>
-                    {{w.user.email}}
-                </td>
-                <td>
-                    {{w.user.paypalEmail}}
-                </td>
-                <td>
-                    PayPal Transaction Code
-                </td>
-                <td>
-                    {{w.amount}}
-                </td>
-                <td>
-                    <button class="w_id" id="{{w.id}}" style="padding-top:5px;padding-bottom:5px">
-                        Approve
-                    </button>
-                </td>
-            </tr>
-            {% endfor %}
-
-
-        </table>
-        <form method="POST" action="" style="margin-top:30px">
+<div style="margin-right:20%;padding-left:20%;">
+    <h1 style="text-align:center">Submit Task</h1>
+    <div class="form-box">
+        <form action="{% url 'submitTaskRemo' %}" method="POST" onsubmit="return validateRemoForm()">
             {% csrf_token %}
-            <label for="ids_appr">Ids to Approve</label><br>
-            <input type="text" value="" name="approve_ids" id="ids_appr" readonly><br>
-            <button type="submit" style="margin-top:20px">
-                APPROVE
-            </button>
+            {% if messages %}
+            <ul>
+                {% for message in messages %}
+                {% if message.tags == 'success' %}
+                <li style="color:green;width:100%">{{ message }}</li>
+                {% else %}
+                <li style="color:red;width:100%">{{ message }}</li>
+                {% endif %}
+                {% endfor %}
+            </ul>
+            {% endif %}
+            <label for="taskname">Task Completed</label><br>
+            <select id="taskname" name="taskname">
+                {% for r in tasks %}
+                <option value="{{r.task_name}}">{{r.task_name}}</option>
+                {% endfor %}
+            </select><br><br>
+            <label for="remo_username">Account Email</label><br>
+            <input type="email" name="remo_username" id="remo_username"
+                   placeholder="Enter Email of the account you have created" required><br><br>
+            <label for="remo_password">Account Password</label><br>
+            <input type="text" name="remo_password" id="remo_password"
+                   placeholder="Enter Password of the account you have created " required><br><br>
+            <label for="country">Select Country</label><br>
+            <select id="country" name="country">
+                <option value="canada">Canada</option>
+                <option value="india">India</option>
+                <option value="unitedstatesofamerica">United States of America</option>
+            </select><br><br>
+            <div class="g-recaptcha" data-sitekey="6Le7AUEpAAAAAHUMKLsMaLNtD-9eSTKauMJnl5wv"></div>
+            <div style="display:flex;">
+                <input type="checkbox" id="checkbox" style="width:30px;align-items:center;justify-content:center"
+                       required>
+                <p>I confirm that the details provided above are correct</p>
+
+            </div>
+            <p id="error_mess" style="color:red"></p>
+
+
+            <div style="align-items:center;display:flex;justify-content:center;width:100%;margin-top:30px">
+                <button type="submit">
+                    SUBMIT
+                </button>
+            </div>
         </form>
-        <hr style="margin-top:40px">
-        <h3>Account Confirmation</h3>
-        <table class="w3-table w3-striped">
-            <tr style="margin-bottom:15px">
-                <th>
-                    tasker
-                </th>
-                <th>
-                    Task
-                </th>
-                <th>
-                    Account Username
-                </th>
-                <th>
-                    Account Password
-                </th>
-                <th>
-                    confirm
-                </th>
-            </tr>
-            {% for c in conf %}
-            <tr>
-                <td>
-                    {{c.id}}
-                </td>
-                <td>
-                    {{c.task.task_name}}
-                </td>
-                <td>
-                    {{c.username}}
-                </td>
-                <td>
-                    {{c.password}}
-                </td>
-
-                <td>
-                    <button class="c_id" id="{{c.id}}" style="padding-top:5px;padding-bottom:5px">
-                        Confirm
-                    </button>
-                </td>
-            </tr>
-            {% endfor %}
-
-
-        </table>
-        <form method="POST" action="" style="margin-top:30px">
-            {% csrf_token %}
-            <label for="ids_appr">Accounts to confirm</label><br>
-            <input type="text" value="" name="confirm_accts"id="acc_conf" readonly><br>
-            <button type="submit" style="margin-top:20px">
-                CONFIRM THE ACCOUNTS ABOVE
-            </button>
-        </form>
-
-
     </div>
 
 </div>
+{% else %}
+<!-- Sidebar -->
+<div class="w3-sidebar w3-bar-block w3-border-right w3-black" style="display:none;z-index:100000" id="mySidebar">
+      <a href="{% url 'home' %}" style="text-decoration:none;margin-top:30px;margin-bottom:50px;font-size:20px"><p id="title">EarnExtraDollar</p></a>
+  <button onclick="w3_close()" class="w3-bar-item w3-large" style="margin-top:30px;margin-bottom:30px;width:130px;background:red;">Close &times;</button>
+  <nav style="margin-left:20px">
+        {% if request.user.is_authenticated %}
+        <a href="{%  url 'account' %}"   style="text-decoration:none;">My Account</a><br><br>
+        {% else %}
+        <a href="{%  url 'login' %}"  style="text-decoration:none;" >Login</a><br><br>
+        <a href="{%  url 'register' %}"  style="text-decoration:none;">Register</a><br><br>
+        {% endif %}
+        <a href="{%  url 'availableTasks' %}"  style="text-decoration:none;color:#33E24F;" >Tasks</a><br><br>
+        <a href="{%  url 'contact' %}"  style="text-decoration:none;" >Contact</a><br><br>
+        {% if request.user.is_authenticated %}
+        <a href="{%  url 'logout' %}"  style="text-decoration:none;">Log Out</a><br><br>
+        {% endif %}
+        </nav>
+</div>
+<nav  style="justify-content:space-between;display:flex;width:100%;margin:0">
+    <a href="{% url 'home' %}" style="text-decoration:none"><p id="title">EarnExtraDollar</p></a>
+  <button class="w3-button w3-black w3-xlarge w3-text-white" onclick="w3_open()">☰</button>
+</nav>
+<div style="margin-right:10px;margin-left:10px;">
+    <h1 style="text-align:center">Submit Task</h1>
+    <div class="form-box">
+        <form action="{% url 'submitTaskRemo' %}" method="POST" onsubmit="return validateRemoForm()"  style="">
+            {% csrf_token %}
+            {% if messages %}
+            <ul>
+                {% for message in messages %}
+
+                {% if message.tags == 'success' %}
+
+                <li style="color:green;width:100%">{{ message }}</li>
+                {% else %}
+                <li style="color:red;width:100%">{{ message }}</li>
+                {% endif %}
+                {% endfor %}
+            </ul>
+            {% endif %}
+            <label for="taskname">Task Completed</label><br>
+            <select id="taskname" name="taskname" style="width:100%;">
+                {% for r in tasks %}
+                <option value="{{r.task_name}}">{{r.task_name}}</option>
+                {% endfor %}
+            </select><br><br>
+            <label for="remo_username">Account Email</label><br>
+            <input type="email" name="remo_username" id="remo_username" style="width:100%;"
+                   placeholder="Enter Email of the account you have created" required><br><br>
+            <label for="remo_password">Account Password</label><br>
+            <input type="text" name="remo_password" id="remo_password" style="width:100%;"
+                   placeholder="Enter Password of the account you have created " required><br><br>
+            <label for="country">Select Country</label><br>
+            <select id="country" name="country" style="width:100%;">
+                <option value="canada">Canada</option>
+                <option value="india">India</option>
+                <option value="unitedstatesofamerica">United States of America</option>
+            </select><br><br>
+            <div class="g-recaptcha" data-sitekey="6Le7AUEpAAAAAHUMKLsMaLNtD-9eSTKauMJnl5wv"></div>
+            <div style="display:flex;align-items:toplmargin-top:10px">
+                <input type="checkbox" id="checkbox" style="width:30px;align-items:center;justify-content:center;margin-right:15px"
+                       required>
+                <p>I confirm that the details provided above are correct</p>
+
+            </div>
+            <p id="error_mess" style="color:red"></p>
+
+
+            <div style="align-items:center;display:flex;justify-content:center;width:100%;margin-top:30px">
+                <button type="submit">
+                    SUBMIT
+                </button>
+            </div>
+        </form>
+    </div>
+
+</div>
+
+{% endif %}
 <script>
-    $(document).ready(function(){
-        var w_req=[];
-        $('.w_id').click(function(){
-            var id_ =$(this).attr('id');
-            var text_ =$(this).text();
-
-            if(text_ == 'Approved'){
-                //deselect
-                $(this).css('background','#00E2B9');
-                $(this).text('Approve');
-                w_req=w_req.filter(item => item !== id_);
-                $('#ids_appr').val(w_req);
-
-            }
-            else{
-                $(this).css('background','#33E24F');
-                $(this).text('Approved');
-                w_req.push(id_);
-                $('#ids_appr').val(w_req);
-
-            }
-        });
-        var ac_conf=[];
-        $('.c_id').click(function(){
-            var id_ =$(this).attr('id');
-            var text_ =$(this).text();
-            if(text_ == 'Confirmed'){
-                //deselect
-                $(this).css('background','#00E2B9');
-                $(this).text('Confirm');
-                ac_conf=ac_conf.filter(item => item !== id_);
-                $('#acc_conf').val(ac_conf);
-
-            }
-            else{
-                $(this).css('background','#33E24F');
-                $(this).text('Confirmed');
-                ac_conf.push(id_);
-                $('#acc_conf').val(ac_conf);
-
-            }
-        });
+    function validateRemoForm() {
+        var recaptchaResponse = grecaptcha.getResponse();
+        if (!recaptchaResponse) {
+            $('#error_mess').text('Please complete the reCAPTCHA challenge.');
+            return false;
+        }
+        return true;
 
 
-
-    });
-
+    }
 </script>
+<script>
+function w3_open() {
+  document.getElementById("mySidebar").style.display = "block";
+}
 
+function w3_close() {
+  document.getElementById("mySidebar").style.display = "none";
+}</script>
 </body>
 </html>

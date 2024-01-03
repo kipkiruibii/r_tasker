@@ -81,3 +81,17 @@ class WithdrawalRequests(models.Model):
 
     def __str__(self):
         return f'{self.user.username} || {self.amount} '
+
+
+class UserSubmittedTasks(models.Model):
+    user = models.ForeignKey(UserProfile, null=True, on_delete=models.CASCADE)
+    taskName = models.TextField(default='text')
+    comment = models.TextField(default='comment')
+    amount = models.IntegerField(default=0)
+    isPending = models.BooleanField(default=False)
+    isConfirmed = models.BooleanField(default=False)
+    isRejected = models.BooleanField(default=False)
+    dateSubmitted = models.DateTimeField(default=datetime.now())
+
+    def __str__(self):
+        return f'{self.user.username} || {self.taskName}'
